@@ -18,6 +18,6 @@ class TwitterVideoFetchTest {
         String bearerToken = "xxx";
         InetSocketAddress proxyAddress = new InetSocketAddress("127.0.0.1", 7890);
         TwitterVideoFetch twitterVideoFetch = new TwitterVideoFetch(proxyAddress, authToken, bearerToken);
-        System.out.println(twitterVideoFetch.fetchVideos(id));
+        System.out.println(twitterVideoFetch.fetchImageByStatusId(id));
     }
 }

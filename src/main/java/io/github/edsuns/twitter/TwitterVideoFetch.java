@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.edsuns.common.ObjectMapperFactory;
 
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.net.*;
 import java.net.http.HttpClient;
@@ -13,6 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.edsuns.common.HttpRequests.*;
 
@@ -20,9 +23,11 @@ import static io.github.edsuns.common.HttpRequests.*;
  * @author edsuns@qq.com
  * @since 2024/1/14 17:13
  */
+@ParametersAreNonnullByDefault
 public class TwitterVideoFetch {
 
     private static final JsonPointer VIDEO_POINTER = JsonPointer.compile("/data/threaded_conversation_with_injections_v2/instructions/0/entries/0/content/itemContent/tweet_results/result/legacy/entities/media/0/video_info/variants");
+    private static final JsonPointer IMAGE_POINTER = JsonPointer.compile("/data/threaded_conversation_with_injections_v2/instructions/0/entries/0/content/itemContent/tweet_results/result/tweet/legacy/entities/media");
 
     private final InetSocketAddress proxyAddress;
     private final String authToken;
@@ -45,7 +50,8 @@ public class TwitterVideoFetch {
                 .build();
     }
 
-    public List<TwitterVideo> fetchVideos(String id) throws IOException, InterruptedException {
+    @Nullable
+    public List<TwitterMedia> fetchImageByStatusId(String id) throws IOException, InterruptedException {
         String authTokenCookieName = "auth_token";
         String csrfTokenCookieName = "ct0";
 
@@ -92,8 +98,27 @@ public class TwitterVideoFetch {
 
         ObjectMapper mapper = ObjectMapperFactory.getDefaultObjectMapper();
         JsonNode root = mapper.readTree(json);
-        JsonNode videos = root.requiredAt(VIDEO_POINTER);
-        return mapper.readValue(videos.traverse(), new TypeReference<>() { });
+
+        JsonNode videos = root.at(VIDEO_POINTER);
+        if (!videos.isMissingNode()) {
+            List<TwitterVideo> twitterVideos = mapper.readValue(videos.traverse(), new TypeReference<>() { });
+            return twitterVideos.stream().map(x -> {
+                TwitterMedia media = new TwitterMedia();
+                media.setVideo(x);
+                return media;
+            }).collect(Collectors.toList());
+        }
+
+        JsonNode images = root.at(IMAGE_POINTER);
+        if (!images.isMissingNode()) {
+            List<TwitterImage> twitterImages = mapper.readValue(images.traverse(), new TypeReference<>() { });
+            return twitterImages.stream().map(x -> {
+                TwitterMedia media = new TwitterMedia();
+                media.setImage(x);
+                return media;
+            }).collect(Collectors.toList());
+        }
+        return null;
     }
 
     private static URI statusUrl(String id) {

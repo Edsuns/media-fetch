@@ -1,5 +1,6 @@
 package io.github.edsuns.common;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import io.github.edsuns.twitter.TwitterVideoFetch;
@@ -18,7 +19,8 @@ public class ObjectMapperFactory {
             synchronized (TwitterVideoFetch.class) {
                 x = DEFAULT_OBJECT_MAPPER;
                 if (x == null) {
-                    x = new ObjectMapper();
+                    x = new ObjectMapper()
+                            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     x.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
                     DEFAULT_OBJECT_MAPPER = x;
                 }
