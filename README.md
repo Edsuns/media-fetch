@@ -4,8 +4,8 @@
 
 ### Twitter (X)
 
-1. open network tab of browser's DevTools
-2. open X website and login
+1. open X website and login
+2. open network tab of browser's DevTools
 3. find `auth_token` in request header `Cookie` and bearer token in request header `Authorization`
 4. putting the tokens as parameters in the constructor
 
