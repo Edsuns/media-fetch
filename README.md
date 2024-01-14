@@ -10,6 +10,6 @@
 4. putting the tokens as parameters in the constructor
 
 ```java
-TwitterVideoFetch twitterVideoFetch = new TwitterVideoFetch(
+TwitterMediaFetch twitterMediaFetch = new TwitterMediaFetch(
         /* proxy */, /* auth_token */, /* bearer token */);
 ```

@@ -3,7 +3,6 @@ package io.github.edsuns.common;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import io.github.edsuns.twitter.TwitterVideoFetch;
 
 /**
  * @author edsuns@qq.com
@@ -16,7 +15,7 @@ public class ObjectMapperFactory {
     public static ObjectMapper getDefaultObjectMapper() {
         ObjectMapper x = DEFAULT_OBJECT_MAPPER;
         if (x == null) {
-            synchronized (TwitterVideoFetch.class) {
+            synchronized (ObjectMapperFactory.class) {
                 x = DEFAULT_OBJECT_MAPPER;
                 if (x == null) {
                     x = new ObjectMapper()

@@ -24,7 +24,7 @@ import static io.github.edsuns.common.HttpRequests.*;
  * @since 2024/1/14 17:13
  */
 @ParametersAreNonnullByDefault
-public class TwitterVideoFetch {
+public class TwitterMediaFetch {
 
     private static final JsonPointer VIDEO_POINTER = JsonPointer.compile("/data/threaded_conversation_with_injections_v2/instructions/0/entries/0/content/itemContent/tweet_results/result/legacy/entities/media/0/video_info/variants");
     private static final JsonPointer IMAGE_POINTER = JsonPointer.compile("/data/threaded_conversation_with_injections_v2/instructions/0/entries/0/content/itemContent/tweet_results/result/tweet/legacy/entities/media");
@@ -36,7 +36,7 @@ public class TwitterVideoFetch {
     private final CookieManager cookieManager;
     private final HttpClient client;
 
-    public TwitterVideoFetch(InetSocketAddress proxyAddress, String authToken, String bearerToken) {
+    public TwitterMediaFetch(InetSocketAddress proxyAddress, String authToken, String bearerToken) {
         this.proxyAddress = proxyAddress;
         this.authToken = authToken;
         this.bearerToken = bearerToken;
