@@ -28,6 +28,7 @@ public class TwitterVideoFetch {
 
     private static final JsonPointer VIDEO_POINTER = JsonPointer.compile("/data/threaded_conversation_with_injections_v2/instructions/0/entries/0/content/itemContent/tweet_results/result/legacy/entities/media/0/video_info/variants");
     private static final JsonPointer IMAGE_POINTER = JsonPointer.compile("/data/threaded_conversation_with_injections_v2/instructions/0/entries/0/content/itemContent/tweet_results/result/tweet/legacy/entities/media");
+    private static final JsonPointer IMAGE_POINTER_2 = JsonPointer.compile("/data/threaded_conversation_with_injections_v2/instructions/0/entries/0/content/itemContent/tweet_results/result/legacy/entities/media");
 
     private final InetSocketAddress proxyAddress;
     private final String authToken;
@@ -51,7 +52,7 @@ public class TwitterVideoFetch {
     }
 
     @Nullable
-    public List<TwitterMedia> fetchImageByStatusId(String id) throws IOException, InterruptedException {
+    public List<TwitterMedia> fetchMediaByStatusId(String id) throws IOException, InterruptedException {
         String authTokenCookieName = "auth_token";
         String csrfTokenCookieName = "ct0";
 
@@ -110,6 +111,9 @@ public class TwitterVideoFetch {
         }
 
         JsonNode images = root.at(IMAGE_POINTER);
+        if (images.isMissingNode()) {
+            images = root.at(IMAGE_POINTER_2);
+        }
         if (!images.isMissingNode()) {
             List<TwitterImage> twitterImages = mapper.readValue(images.traverse(), new TypeReference<>() { });
             return twitterImages.stream().map(x -> {
