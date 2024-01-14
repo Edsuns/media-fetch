@@ -85,7 +85,7 @@ public class TwitterVideoFetch {
                 HttpRequest.newBuilder()
                         .uri(detailUrl)
                         .headers(
-                                HEADER_AUTHORIZATION, "Bearer " + bearerToken,
+                                HEADER_AUTHORIZATION, composeBearerToken(bearerToken),
                                 "X-Csrf-Token", csrfToken
                         )
                         .GET()
@@ -123,6 +123,14 @@ public class TwitterVideoFetch {
             }).collect(Collectors.toList());
         }
         return null;
+    }
+
+    private static String composeBearerToken(String bearerToken) {
+        String prefix = "Bearer ";
+        if (bearerToken.startsWith(prefix)) {
+            return bearerToken;
+        }
+        return prefix + bearerToken;
     }
 
     private static URI statusUrl(String id) {
