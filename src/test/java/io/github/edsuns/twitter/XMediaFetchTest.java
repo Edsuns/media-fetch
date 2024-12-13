@@ -9,7 +9,7 @@ import java.net.InetSocketAddress;
  * @author edsuns@qq.com
  * @since 2024/1/14 18:54
  */
-class TwitterMediaFetchTest {
+class XMediaFetchTest {
 
     @Test
     void test() throws IOException, InterruptedException {
@@ -17,7 +17,7 @@ class TwitterMediaFetchTest {
         String authToken = "xxx";
         String bearerToken = "xxx";
         InetSocketAddress proxyAddress = new InetSocketAddress("127.0.0.1", 7890);
-        TwitterMediaFetch twitterMediaFetch = new TwitterMediaFetch(proxyAddress, authToken, bearerToken);
-        System.out.println(twitterMediaFetch.fetchMediaByStatusId(id));
+        XMediaFetch xMediaFetch = new XMediaFetch(proxyAddress, authToken, bearerToken);
+        System.out.println(xMediaFetch.fetchMediaByStatusId(id));
     }
 }

@@ -2,7 +2,7 @@
 
 ## Usages
 
-### Twitter (X)
+### X (Twitter)
 
 1. open X website and login
 2. open network tab of browser's DevTools
@@ -10,6 +10,6 @@
 4. putting the tokens as parameters in the constructor
 
 ```java
-TwitterMediaFetch twitterMediaFetch = new TwitterMediaFetch(
+TwitterMediaFetch xMediaFetch = new TwitterMediaFetch(
         /* proxy */, /* auth_token */, /* bearer token */);
 ```
