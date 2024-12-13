@@ -75,8 +75,7 @@ public class XMediaFetch {
         URI statusUrl = statusUrl(id);
         putCookies(cookieManager, statusUrl, authTokenCookieName, authToken);
         client.send(
-                HttpRequest.newBuilder()
-                        .uri(statusUrl)
+                HttpRequest.newBuilder(statusUrl)
                         .headers(
                                 HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9",
                                 HEADER_ACCEPT_LANGUAGE, "zh-CN,zh;q=0.9",
@@ -85,7 +84,7 @@ public class XMediaFetch {
                         .GET()
                         .build(),
                 HttpResponse.BodyHandlers.discarding()
-        ).body();
+        );
         String csrfToken = cookieManager.getCookieStore().get(statusUrl).stream().filter(x -> csrfTokenCookieName.equals(x.getName()))
                 .map(HttpCookie::getValue).findAny().orElse(null);
         if (csrfToken == null || csrfToken.isBlank()) {
@@ -98,8 +97,7 @@ public class XMediaFetch {
                 csrfTokenCookieName, csrfToken
         );
         HttpResponse<String> response = client.send(
-                HttpRequest.newBuilder()
-                        .uri(detailUrl)
+                HttpRequest.newBuilder(detailUrl)
                         .headers(
                                 HEADER_AUTHORIZATION, bearerToken,
                                 "X-Csrf-Token", csrfToken
