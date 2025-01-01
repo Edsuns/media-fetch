@@ -1,12 +1,12 @@
 package io.github.edsuns.twitter;
 
 import com.fasterxml.jackson.core.JsonPointer;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.github.edsuns.common.ObjectMapperFactory;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.net.*;
@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static io.github.edsuns.common.HttpRequests.*;
@@ -47,13 +48,14 @@ public class XMediaFetch {
     private static final JsonPointer POINTER_MEDIA_1 = JsonPointer.compile("/content/itemContent/tweet_results/result/tweet/legacy/entities/media");
     private static final JsonPointer POINTER_MEDIA_2 = JsonPointer.compile("/content/itemContent/tweet_results/result/legacy/entities/media");
 
+    @Nullable
     private final InetSocketAddress proxyAddress;
     private final String authToken;
     private final String bearerToken;
     private final CookieManager cookieManager;
     private final HttpClient client;
 
-    public XMediaFetch(InetSocketAddress proxyAddress, String authToken, String bearerToken) {
+    public XMediaFetch(@Nullable InetSocketAddress proxyAddress, String authToken, String bearerToken) {
         this.proxyAddress = proxyAddress;
         this.authToken = authToken;
         this.bearerToken = composeBearerToken(bearerToken);
@@ -115,28 +117,31 @@ public class XMediaFetch {
         JsonNode root = mapper.readTree(json);
         ArrayNode instructions = root.withArray(POINTER_INSTRUCTIONS);
         if (!instructions.isMissingNode()) {
-            ArrayNode mediaArray = StreamSupport.stream(instructions.spliterator(), false)
+            List<XMedia> mediaList = StreamSupport.stream(instructions.spliterator(), false)
                     .filter(x -> Objects.equals(x.get("type").asText(), "TimelineAddEntries"))
                     .map(addEntriesInstruction -> (ArrayNode) addEntriesInstruction.withArray("entries"))
                     .flatMap(entries -> StreamSupport.stream(entries.spliterator(), false))
                     .filter(x -> Objects.equals(x.at(POINTER_ENTRY_TYPE).asText(), "TimelineTimelineItem"))
                     .map(x -> Optional.of(x.withArray(POINTER_MEDIA_1))
-                            .filter(media -> !media.isEmpty())
-                            .orElseGet(() -> x.withArray(POINTER_MEDIA_2)))
-                    .findFirst().orElse(null);
-            if (mediaArray != null) {
-                List<XMedia> mediaList = mapper.readValue(mediaArray.traverse(), new TypeReference<>() { });
-                if (mediaList != null) {
-                    for (XMedia media : mediaList) {
-                        if (XMedia.Type.photo == media.getType() && media.getMediaUrlHttps() != null) {
-                            media.setMediaUrlHttps(media.getMediaUrlHttps() + "?name=large");
-                        }
-                    }
+                            .filter(media -> !media.isEmpty()).orElseGet(() -> x.withArray(POINTER_MEDIA_2)))
+                    .flatMap(arr -> StreamSupport.stream(arr.spliterator(), false))
+                    .map(x -> toXMedia(mapper, x)).collect(Collectors.toList());
+            for (XMedia media : mediaList) {
+                if (XMedia.Type.photo == media.getType() && media.getMediaUrlHttps() != null) {
+                    media.setMediaUrlHttps(media.getMediaUrlHttps() + "?name=large");
                 }
-                return mediaList;
             }
+            return mediaList;
         }
         return Collections.emptyList();
+    }
+
+    private XMedia toXMedia(ObjectMapper mapper, JsonNode x) {
+        try {
+            return mapper.readValue(x.traverse(), XMedia.class);
+        } catch (IOException e) {
+            throw new InternalError(e);
+        }
     }
 
     private static String composeBearerToken(String bearerToken) {
